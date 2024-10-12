@@ -95,5 +95,147 @@ Create a ```GET``` endpoint that retrieves all providers by their specialty
 
 <br>
 
+// // Declare dependences
+// const express = require('express');
+// const app = express();
+// const mysql = require("mysql2");
+// const dotenv = require('dotenv');
+// const cors=require('cors');
+
+// app.use(express.json());
+// app.use(cors());
+// dotenv.config();
+
+// //Connect to the database ***
+// const db = mysql.createConnection({
+//     host: process.env.DB_HOST,
+//     user: process.env.DB_USER,
+//     password: process.env.DB_PASSWORD,
+//     database: process.env.DB_NAME
+// }); 
+
+// Declare dependencies / variables
+const express = require("express");
+const app = express();
+const mysql = require("mysql2");
+const dotenv = require("dotenv");
+const cors = require("cors");
+
+app.use(express.json());
+app.use(cors());
+dotenv.config();
+
+// Connect to the database
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
+
+// Set view engine to EJS
+app.set("view engine", "ejs");
+app.set("views", __dirname + "/views");
+
+// GET method to retrieve data from the database
+app.get("/data", (req, res) => {
+  db.query("SELECT * FROM patients", (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error retrieving data");
+    } else {
+      // Render the data in the template
+      res.render("data", { results });
+    }
+  });
+});
+
+// Question 1 goes here
+// Assume 'db' is your MySQL connection
+console.log("Connected to MySQL successfully as id:", db.threadId);
+
+
+app.get('/', (req, res) => {
+   
+    const patient_id = 949; 
+    const first_name = 'Oluwatosin'; 
+    const last_name = 'Ayoola'; 
+    const date_of_birth = '1990-04-28'; 
+
+    // Sending a single response with all data
+    res.json({
+        patient_id: patient_id,
+        first_name: first_name,
+        last_name: last_name,
+        date_of_birth: date_of_birth
+    });
+});
+// Question 2 goes here
+
+app.get('/', (req, res) => {
+   
+   
+    const first_name = 'Oluwatosin'; 
+    const last_name = 'Ayoola'; 
+    const provider_specialty = 'neurologist'; 
+
+    // Sending a single response with all data
+    res.json({
+        first_name: first_name,
+        last_name: last_name,
+        provider_specialty: neurologist,
+    });
+});
+
+// Question 3 goes here
+
+// Connect to MySQL
+db.connect((err) => {
+    if (err) {
+        console.error("Couldn't connect to the database:", err);
+        return;
+    }
+    console.log("Connected to MySQL successfully as id:", db.threadId);
+});
+
+// Define a route to retrieve all patients
+app.get('/patients', (req, res) => {
+    const sqlQuery = 'SELECT patient_id, FROM patients';
+    
+    db.query(sqlQuery, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        
+        // To send the results as a JSON response
+        res.json(results);
+    });
+});
+
+// Question 4 goes here
+
+app.get('/patients/specialty/:specialty', (req, res) => {
+    const { specialty } = req.params;  
+
+    const sqlQuery = 'SELECT patient_id, first_name, last_name, date_of_birth, specialty FROM patients WHERE specialty = ?';
+    
+    db.query(sqlQuery, [specialty], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No patients found for this specialty' });
+        }
+        // To send the results as a JSON response
+        res.json(results);
+    });
+});
+// listen to the server
+const PORT = 3000
+app.listen(PORT, () => {
+  console.log(`server is runnig on http://localhost:${PORT}`)
+})
 
 ## NOTE: Do not fork this repository
